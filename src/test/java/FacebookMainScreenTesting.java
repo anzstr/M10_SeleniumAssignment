@@ -1,11 +1,10 @@
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+
 import java.lang.Thread;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
 
@@ -33,8 +32,8 @@ public class FacebookMainScreenTesting {
         driver.get(HOME_PAGE_URL);
     }
 
-    @Test
-    public void findElementsByXpathTest() {
+    @BeforeEach
+    public void createNewAccTest() throws InterruptedException {
         WebElement newAccountButtonElement = driver.findElement(By.xpath("//a[text()='Create new account']"));
         assertNotNull(newAccountButtonElement);
         newAccountButtonElement.click();
@@ -43,6 +42,11 @@ public class FacebookMainScreenTesting {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void findElementsByXpathTest() {
+
         WebElement firstNameElement = driver.findElement(By.xpath("//input[@name='firstname']"));
         assertNotNull(firstNameElement);
         WebElement lastNameElement = driver.findElement(By.xpath("//input[@name='lastname']"));
@@ -63,51 +67,43 @@ public class FacebookMainScreenTesting {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghjklmnopqrstuvwxyz0123456789",
-            "l!@#$%^&*()_k",
-            "wrong email.address"
+            "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_",
+            "wrong email.address",
+            "correct@email.address"
     })
-    public void wrongTextTesting(String param){
-        WebElement newAccountButtonElement = driver.findElement(By.xpath("//a[text()='Create new account']"));
-        assertNotNull(newAccountButtonElement);
-        newAccountButtonElement.click();
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        WebElement firstNameElement = driver.findElement(By.xpath("//input[@name='firstname']"));
-        assertNotNull(firstNameElement);
-//        String longText = ;
-        firstNameElement.sendKeys(param);
-        String firstNameValue = firstNameElement.getAttribute("value");
-        assertEquals(param, firstNameValue);
-
-        WebElement lastNameElement = driver.findElement(By.xpath("//input[@name='lastname']"));
-        assertNotNull(lastNameElement);
-//        String wrongChars = ;
-        lastNameElement.sendKeys(param);
-
+    public void specialCharactersInvalidInputTesting(String param) {
         WebElement phoneEmailElement = driver.findElement(By.xpath("//input[@name='reg_email__']"));
         assertNotNull(phoneEmailElement);
         phoneEmailElement.sendKeys(param);
         try {
-            Thread.sleep(3000);
+            Thread.sleep(500);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        String phoneEmailValue = phoneEmailElement.getAttribute("value");
+        assertEquals(param, phoneEmailValue);
+    }
+
+
+    @Test
+    public void longTextTesting() {
+        String longText = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghjklmnopqrstuvwxyz0123456789";
+        WebElement firstNameElement = driver.findElement(By.xpath("//input[@name='firstname']"));
+        assertNotNull(firstNameElement);
+        firstNameElement.sendKeys(longText);
+        String firstNameValue = firstNameElement.getAttribute("value");
+        assertEquals(longText, firstNameValue);
+
+        WebElement lastNameElement = driver.findElement(By.xpath("//input[@name='lastname']"));
+        assertNotNull(lastNameElement);
+        lastNameElement.sendKeys(longText);
+        String lastNameValue = lastNameElement.getAttribute("value");
+        assertEquals(longText, lastNameValue);
     }
 
     @Test
-    public void genderElementsTesting(){
-        WebElement newAccountButtonElement = driver.findElement(By.xpath("//a[text()='Create new account']"));
-        assertNotNull(newAccountButtonElement);
-        newAccountButtonElement.click();
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public void customGenderField() {
+//        createNewAccTest();
         WebElement radioGenderElement = driver.findElement(By.xpath("//input[@name='sex' and @value='-1']"));
         assertNotNull(radioGenderElement);
         radioGenderElement.click();
